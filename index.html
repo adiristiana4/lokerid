@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lowongan Pilihan</title>
+    <meta name="description" content="Temukan lowongan kerja pilihan di berbagai lokasi dan kategori.">
+    <meta name="robots" content="index, follow">
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        *, *::before, *::after { box-sizing: border-box; }
+        :root {
+            --primary-color: #4CAF50; --secondary-color: #333; --background-color: #f0f2f5;
+            --card-background: #fff; --text-color: #555; --border-radius: 0.75rem;
+            --box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.08);
+            --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+        body {
+            font-family: var(--font-family); background-color: var(--background-color);
+            color: var(--text-color); line-height: 1.6; margin: 0; padding: 0; font-size: 16px;
+        }
+        header {
+            background-color: var(--card-background); box-shadow: var(--box-shadow);
+            padding: 1.5rem 2rem; display: flex; justify-content: space-between; align-items: center;
+        }
+        header h1 { margin: 0; font-size: 1.5rem; color: var(--secondary-color); }
+        header .menu-icon { font-size: 1.5rem; color: var(--secondary-color); cursor: pointer; }
+        .nav-menu {
+            position: fixed; top: 0; right: 0; width: 80%; max-width: 300px; height: 100%;
+            background-color: var(--card-background); box-shadow: -2px 0 10px rgba(0, 0, 0, 0.2);
+            transform: translateX(100%); transition: transform 0.3s ease-in-out; z-index: 1000;
+        }
+        .nav-menu.active { transform: translateX(0); }
+        .nav-menu-header { display: flex; justify-content: flex-end; padding: 1rem; border-bottom: 1px solid #eee; }
+        .nav-menu-header .close-icon { font-size: 1.5rem; color: var(--secondary-color); cursor: pointer; }
+        .nav-menu-list { list-style: none; padding: 1rem 0; margin: 0; }
+        .nav-menu-list a {
+            display: block; padding: 1rem 1.5rem; color: var(--secondary-color);
+            text-decoration: none; font-weight: 500; transition: background-color 0.2s;
+        }
+        .nav-menu-list a:hover { background-color: #f0f0f0; }
+        .nav-menu-list a i { margin-right: 0.75rem; }
+        .nav-menu-list .location-menu { position: relative; cursor: pointer; }
+        .nav-menu-list .location-menu a { display: flex; justify-content: space-between; align-items: center; }
+        .nav-menu-list .location-menu-list {
+            list-style: none; padding-left: 2rem; max-height: 0; overflow: hidden;
+            transition: max-height 0.3s ease-in-out; overflow-y: auto;
+        }
+        .nav-menu-list .location-menu-list.active { max-height: 200px; }
+        .overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0, 0, 0, 0.5); display: none; z-index: 999;
+        }
+        main { max-width: 900px; margin: 2rem auto; padding: 0 1rem; }
+        #search-container {
+            margin-bottom: 2rem; display: flex; align-items: center; background-color: var(--card-background);
+            border-radius: var(--border-radius); padding: 1rem; box-shadow: var(--box-shadow);
+        }
+        #search-container i { margin-right: 1rem; color: #777; }
+        #search-input { width: 100%; border: none; font-size: 1rem; padding: 0.5rem; }
+        #search-input:focus { outline: none; }
+        section {
+            background-color: var(--card-background); padding: 2rem;
+            border-radius: var(--border-radius); box-shadow: var(--box-shadow); margin-bottom: 2rem;
+        }
+        .post-list { display: grid; gap: 1.5rem; list-style: none; padding: 0; }
+        .post-card {
+            display: flex; flex-direction: column; background-color: #f9f9f9; padding: 1.5rem;
+            border-radius: var(--border-radius); border: 1px solid #eee;
+            transition: transform 0.3s, box-shadow 0.3s; cursor: pointer;
+        }
+        .post-card:hover { transform: translateY(-0.5rem); box-shadow: 0 0.75rem 1.25rem rgba(0, 0, 0, 0.1); }
+        .post-card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem; }
+        .post-info { flex-grow: 1; padding-right: 1rem; }
+        .post-info h3 { margin: 0 0 0.5rem; font-size: 1.25rem; color: var(--secondary-color); }
+        .post-info .location { margin: 0; font-size: 0.9rem; color: #777; border-bottom: 1px dashed #ccc; padding-bottom: 0.25rem; }
+        .post-logo { width: 3.5rem; height: 3.5rem; border-radius: 50%; overflow: hidden; border: 1px solid #eee; flex-shrink: 0; }
+        .post-logo img { width: 100%; height: 100%; object-fit: contain; }
+        .post-meta { display: flex; align-items: center; gap: 1rem; margin-top: 0.5rem; }
+        .post-meta span { font-size: 0.8rem; color: #777; }
+        .post-meta span::before { content: "🕒"; margin-right: 0.2rem; }
+        .post-badges { display: flex; gap: 0.5rem; margin-top: 1rem; flex-wrap: wrap; }
+        .post-badge {
+            background-color: #e3f2fd; color: #1565c0; font-size: 0.8rem; font-weight: bold;
+            padding: 0.25rem 0.75rem; border-radius: 1rem;
+        }
+        .breadcrumb { list-style: none; padding: 0; margin-bottom: 1rem; display: flex; font-size: 0.9rem; }
+        .breadcrumb li:not(:last-child)::after { content: ">"; margin: 0 0.5rem; color: #aaa; }
+        .breadcrumb a { color: #555; text-decoration: none; }
+        .breadcrumb a:hover { text-decoration: underline; }
+        #post-detail { display: none; }
+        .share-buttons {
+            display: flex; justify-content: center; gap: 1rem; margin-top: 1.5rem;
+            padding-top: 1.5rem; border-top: 1px solid #eee;
+        }
+        .share-btn {
+            display: flex; justify-content: center; align-items: center; width: 2.5rem; height: 2.5rem;
+            border-radius: 50%; color: white; font-size: 1.2rem; text-decoration: none; transition: transform 0.2s;
+        }
+        .share-btn:hover { transform: translateY(-2px); }
+        .share-btn.facebook { background-color: #3b5998; } .share-btn.linkedin { background-color: #0077b5; }
+        .share-btn.x { background-color: #000; } .share-btn.telegram { background-color: #0088cc; }
+        .share-btn.whatsapp { background-color: #25d366; }
+        #post-detail h2 { font-size: 2rem; border: none; text-align: center; }
+        #post-detail p { white-space: pre-wrap; }
+        #post-detail .apply-link {
+            display: block; background-color: #2196F3; color: white; text-align: center; padding: 1rem;
+            margin-top: 1.5rem; text-decoration: none; border-radius: var(--border-radius); font-weight: bold;
+            transition: background-color 0.3s;
+        }
+        #post-detail .apply-link:hover { background-color: #1976D2; }
+        .similar-posts { margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid #eee; }
+        .similar-posts h3 { font-size: 1.25rem; color: var(--secondary-color); margin-bottom: 1rem; }
+        .similar-posts-list .post-card { background-color: transparent; border: none; box-shadow: none; padding: 1rem 0; margin-bottom: 0.5rem; }
+        .similar-posts-list .post-card:hover { transform: none; background-color: #fafafa; box-shadow: none; }
+        footer { text-align: center; padding: 1.5rem 0; color: #999; font-size: 0.875rem; }
+        .footer-links { margin-bottom: 0.5rem; display: flex; justify-content: center; gap: 1rem; }
+        .footer-links a { color: #777; text-decoration: none; font-size: 0.9rem; font-weight: 500; }
+        .footer-links a:hover { text-decoration: underline; }
+        .footer-brand { font-weight: bold; color: #337ab7; text-decoration: none; }
+        @media (min-width: 600px) {
+            header h1 { font-size: 2.5rem; }
+            .post-list { grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr)); }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Lowongan Pilihan</h1>
+        <i class="fas fa-bars menu-icon" id="menu-icon"></i>
+    </header>
+
+    <div class="nav-menu" id="nav-menu">
+        <div class="nav-menu-header">
+            <i class="fas fa-times close-icon" id="close-icon"></i>
+        </div>
+        <ul class="nav-menu-list">
+            <li><a href="index.html"><i class="fas fa-folder-open"></i> Lowongan Terbaru</a></li>
+            <li class="location-menu" id="location-menu">
+                <a href="#"><i class="fas fa-map-marker-alt"></i> Lokasi <i class="fas fa-chevron-down"></i></a>
+                <ul class="location-menu-list" id="location-menu-list">
+                    <li><a href="#" data-location="Jakarta">Jakarta</a></li>
+                    <li><a href="#" data-location="Bekasi">Bekasi</a></li>
+                    <li><a href="#" data-location="Tangerang">Tangerang</a></li>
+                    <li><a href="#" data-location="Bogor">Bogor</a></li>
+                    <li><a href="#" data-location="Karawang">Karawang</a></li>
+                </ul>
+            </li>
+            <li style="margin-top: 2rem;"><a href="admin.html"><i class="fas fa-user-shield"></i> Halaman Admin</a></li>
+        </ul>
+    </div>
+    <div class="overlay" id="overlay"></div>
+
+    <main>
+        <div id="search-container">
+            <i class="fas fa-search"></i>
+            <input type="text" id="search-input" placeholder="Cari lowongan...">
+        </div>
+        <section id="posts-container">
+            <div class="post-list"></div>
+        </section>
+        <section id="post-detail">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb" id="breadcrumb-list"><li><a href="#">Home</a></li></ol>
+            </nav>
+            <article>
+                <div id="post-detail-content"></div>
+                <div class="share-buttons">
+                    <a href="#" id="share-facebook" class="share-btn facebook" target="_blank"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#" id="share-linkedin" class="share-btn linkedin" target="_blank"><i class="fab fa-linkedin-in"></i></a>
+                    <a href="#" id="share-x" class="share-btn x" target="_blank"><i class="fab fa-x-twitter"></i></a>
+                    <a href="#" id="share-telegram" class="share-btn telegram" target="_blank"><i class="fab fa-telegram-plane"></i></a>
+                    <a href="#" id="share-whatsapp" class="share-btn whatsapp" target="_blank"><i class="fab fa-whatsapp"></i></a>
+                </div>
+            </article>
+            <div class="similar-posts" id="similar-posts-section" style="display: none;">
+                <h3>Lowongan Kerja Sejenis</h3>
+                <div class="similar-posts-list"></div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="footer-links">
+            <a href="#">Contact Us</a> <a href="#">Disclaimer</a> <a href="#">Privacy Policy</a>
+        </div>
+        <p>Copyright © <span id="current-year"></span> <a href="#" class="footer-brand">LowonganPilihan.com</a>. All rights reserved.</p>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const postsContainer = document.getElementById('posts-container');
+            const postsList = document.querySelector('#posts-container .post-list');
+            const postDetail = document.getElementById('post-detail');
+            const postDetailContent = document.getElementById('post-detail-content');
+            const similarPostsSection = document.getElementById('similar-posts-section');
+            const similarPostsList = document.querySelector('.similar-posts-list');
+            const searchContainer = document.getElementById('search-container');
+            const searchInput = document.getElementById('search-input');
+            const menuIcon = document.getElementById('menu-icon');
+            const navMenu = document.getElementById('nav-menu');
+            const closeIcon = document.getElementById('close-icon');
+            const overlay = document.getElementById('overlay');
+            const locationMenu = document.getElementById('location-menu');
+            const locationMenuList = document.getElementById('location-menu-list');
+            const breadcrumbList = document.getElementById('breadcrumb-list');
+            
+            let allPosts = [];
+            let filteredPosts = [];
+
+            const shareFacebookBtn = document.getElementById('share-facebook');
+            const shareLinkedinBtn = document.getElementById('share-linkedin');
+            const shareXBtn = document.getElementById('share-x');
+            const shareTelegramBtn = document.getElementById('share-telegram');
+            const shareWhatsappBtn = document.getElementById('share-whatsapp');
+
+            function showPostList() {
+                postsContainer.style.display = 'block';
+                postDetail.style.display = 'none';
+                searchContainer.style.display = 'flex';
+                document.title = 'Lowongan Pilihan';
+                history.pushState(null, '', window.location.pathname);
+            }
+
+            function showPostDetail(post) {
+                postsContainer.style.display = 'none';
+                postDetail.style.display = 'block';
+                searchContainer.style.display = 'none';
+
+                breadcrumbList.innerHTML = `<li><a href="#" id="breadcrumb-home">Home</a></li><li>${post.title}</li>`;
+                document.title = `${post.title} - Lowongan Pilihan`;
+                
+                history.pushState({ postTitle: post.title }, post.title, `#post-${post.title.replace(/\s+/g, '-').toLowerCase()}`);
+
+                const currentUrl = window.location.href;
+                const encodedTitle = encodeURIComponent(post.title);
+                const encodedUrl = encodeURIComponent(currentUrl);
+
+                shareFacebookBtn.href = `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`;
+                shareLinkedinBtn.href = `https://www.linkedin.com/shareArticle?mini=true&url=${encodedUrl}&title=${encodedTitle}`;
+                shareXBtn.href = `https://twitter.com/intent/tweet?url=${encodedUrl}&text=${encodedTitle}`;
+                shareTelegramBtn.href = `https://t.me/share/url?url=${encodedUrl}&text=${encodedTitle}`;
+                shareWhatsappBtn.href = `https://api.whatsapp.com/send?text=${encodedTitle}%20%2D%20${encodedUrl}`;
+
+                let imageHtml = post.image ? `<div style="text-align: center; margin-bottom: 1rem;"><img src="${post.image}" alt="${post.company}" style="max-width: 150px; height: auto;" loading="lazy"></div>` : '';
+                let applyLinkHtml = '';
+
+                if (post.applyLink) {
+                    applyLinkHtml = `<a href="${post.applyLink}" target="_blank" rel="noopener noreferrer" class="apply-link">Lamar via Website</a>`;
+                } else if (post.applyEmail) {
+                    applyLinkHtml = `<a href="mailto:${post.applyEmail}" rel="noopener noreferrer" class="apply-link">Lamar via Email</a>`;
+                }
+                
+                const structuredData = {
+                    "@context": "https://schema.org", "@type": "JobPosting", "title": post.title,
+                    "description": post.content, "datePosted": post.datePublished, "validThrough": "2025-12-31T00:00",
+                    "employmentType": "FULL_TIME", "hiringOrganization": { "@type": "Organization", "name": post.company },
+                    "jobLocation": { "@type": "Place", "address": { "@type": "PostalAddress", "addressLocality": post.location, "addressCountry": "ID" } }
+                };
+
+                const oldScript = postDetailContent.querySelector('script[type="application/ld+json"]');
+                if (oldScript) oldScript.remove();
+                
+                const structuredDataScript = document.createElement('script');
+                structuredDataScript.type = 'application/ld+json';
+                structuredDataScript.textContent = JSON.stringify(structuredData);
+                
+                postDetailContent.innerHTML = `
+                    <article>
+                        ${imageHtml}
+                        <h2 style="text-align: center;">${post.title}</h2>
+                        <p><b>Perusahaan:</b> ${post.company}</p>
+                        <p><b>Lokasi:</b> ${post.location}</p>
+                        <p><b>Kategori:</b> ${post.category}</p>
+                        <hr>
+                        <p><b>Deskripsi:</b></p>
+                        <p>${post.content.replace(/\n/g, '<br>')}</p>
+                        ${applyLinkHtml}
+                    </article>
+                `;
+                postDetailContent.prepend(structuredDataScript);
+
+                displaySimilarPosts(post.category, post.title);
+                document.getElementById('breadcrumb-home').addEventListener('click', (e) => { e.preventDefault(); showPostList(); });
+            }
+
+            function displaySimilarPosts(category, currentPostTitle) {
+                const similar = allPosts.filter(p => p.category === category && p.title !== currentPostTitle);
+                
+                similarPostsList.innerHTML = '';
+                if (similar.length > 0) {
+                    similarPostsSection.style.display = 'block';
+                    similar.slice(0, 5).forEach(p => {
+                        const postElement = createPostCard(p);
+                        postElement.addEventListener('click', () => {
+                            showPostDetail(p);
+                            window.scrollTo({ top: 0, behavior: 'smooth' });
+                        });
+                        similarPostsList.appendChild(postElement);
+                    });
+                } else {
+                    similarPostsSection.style.display = 'none';
+                }
+            }
+            
+            function createPostCard(post) {
+                const postElement = document.createElement('div');
+                postElement.classList.add('post-card');
+                const imageHtml = post.image ? `<div class="post-logo"><img src="${post.image}" alt="${post.company}" loading="lazy"></div>` : `<div class="post-logo" style="background-color: #eee;"></div>`;
+                postElement.innerHTML = `
+                    <div class="post-card-header">
+                        <div class="post-info">
+                            <h3>${post.title}</h3>
+                            <p class="location">${post.company} - ${post.location}</p>
+                        </div>
+                        ${imageHtml}
+                    </div>
+                    <div class="post-badges">
+                        <span class="post-badge">${post.category}</span>
+                    </div>
+                `;
+                return postElement;
+            }
+
+            function displayPosts() {
+                postsList.innerHTML = '';
+                if (filteredPosts.length === 0) {
+                    postsList.innerHTML = '<p style="text-align: center; color: #777;">Tidak ada lowongan yang ditemukan.</p>';
+                    return;
+                }
+                const fragment = document.createDocumentFragment();
+                filteredPosts.forEach(post => {
+                    const postElement = createPostCard(post);
+                    postElement.addEventListener('click', () => showPostDetail(post));
+                    fragment.appendChild(postElement);
+                });
+                postsList.appendChild(fragment);
+            }
+            
+            let debounceTimer;
+            function filterAndDisplayPosts(query = '', location = '') {
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(() => {
+                    const lowerCaseQuery = query.toLowerCase();
+                    const lowerCaseLocation = location.toLowerCase();
+                    filteredPosts = allPosts.filter(post => 
+                        (post.title.toLowerCase().includes(lowerCaseQuery) ||
+                         post.company.toLowerCase().includes(lowerCaseQuery) ||
+                         post.category.toLowerCase().includes(lowerCaseQuery)) &&
+                        (location === '' || post.location.toLowerCase().includes(lowerCaseLocation))
+                    );
+                    displayPosts();
+                }, 300);
+            }
+
+            // Initial Load
+            allPosts = JSON.parse(localStorage.getItem('posts')) || [];
+            filteredPosts = allPosts;
+            displayPosts();
+
+            searchInput.addEventListener('input', (event) => filterAndDisplayPosts(event.target.value));
+
+            window.addEventListener('popstate', (event) => {
+                if (event.state && event.state.postTitle) {
+                    const post = allPosts.find(p => p.title === event.state.postTitle);
+                    if (post) showPostDetail(post);
+                } else {
+                    showPostList();
+                }
+            });
+
+            // Nav Menu Logic
+            menuIcon.addEventListener('click', () => { navMenu.classList.add('active'); overlay.style.display = 'block'; });
+            closeIcon.addEventListener('click', () => { navMenu.classList.remove('active'); overlay.style.display = 'none'; });
+            overlay.addEventListener('click', () => { navMenu.classList.remove('active'); overlay.style.display = 'none'; });
+            locationMenu.addEventListener('click', (event) => { event.preventDefault(); locationMenuList.classList.toggle('active'); });
+            
+            locationMenuList.addEventListener('click', (event) => {
+                if(event.target.tagName === 'A') {
+                    event.preventDefault();
+                    const location = event.target.dataset.location;
+                    searchInput.value = ''; // Clear search when filtering by location
+                    filterAndDisplayPosts('', location);
+                    navMenu.classList.remove('active');
+                    overlay.style.display = 'none';
+                }
+            });
+
+            document.getElementById('current-year').textContent = new Date().getFullYear();
+        });
+    </script>
+</body>
+</html>
