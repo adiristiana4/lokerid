@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Lowongan Pilihan</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; }
+        :root {
+            --primary-color: #4CAF50; --secondary-color: #333; --background-color: #f0f2f5;
+            --card-background: #fff; --text-color: #555; --border-radius: 0.75rem;
+            --box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.08);
+            --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+        body {
+            font-family: var(--font-family); background-color: var(--background-color);
+            color: var(--text-color); line-height: 1.6; margin: 0; padding: 0;
+        }
+        header {
+            background-color: var(--card-background); box-shadow: var(--box-shadow);
+            padding: 1.5rem 2rem; display: flex; justify-content: space-between; align-items: center;
+        }
+        header h1 { margin: 0; font-size: 1.5rem; color: var(--secondary-color); }
+        main { max-width: 900px; margin: 2rem auto; padding: 0 1rem; }
+        h2 { text-align: center; color: var(--secondary-color); margin-bottom: 2rem; }
+        .form-container, .post-list-container {
+            background-color: var(--card-background); padding: 2rem;
+            border-radius: var(--border-radius); box-shadow: var(--box-shadow); margin-bottom: 2rem;
+        }
+        .form-group { margin-bottom: 1.5rem; }
+        .form-group label { display: block; margin-bottom: 0.5rem; font-weight: bold; color: var(--secondary-color); }
+        .form-group input, .form-group textarea, .form-group select {
+            width: 100%; padding: 0.75rem; border: 1px solid #ccc;
+            border-radius: 0.5rem; font-family: var(--font-family); font-size: 1rem;
+        }
+        .form-group textarea { min-height: 150px; resize: vertical; }
+        #submit-btn {
+            display: block; width: 100%; padding: 1rem; background-color: var(--primary-color);
+            color: white; border: none; border-radius: 0.5rem; font-size: 1.1rem;
+            font-weight: bold; cursor: pointer; transition: background-color 0.3s;
+        }
+        #submit-btn:hover { background-color: #43a047; }
+        .post-item { display: flex; justify-content: space-between; align-items: center; padding: 1rem; border-bottom: 1px solid #eee; }
+        .post-item:last-child { border-bottom: none; }
+        .post-item-info { flex-grow: 1; }
+        .post-item-info h3 { margin: 0; font-size: 1.1rem; color: var(--secondary-color); }
+        .post-item-info p { margin: 0.25rem 0 0; font-size: 0.9rem; color: #777; }
+        .post-item-actions { display: flex; gap: 0.5rem; }
+        .post-item-actions button {
+            background-color: #f44336; color: white; border: none; padding: 0.5rem 0.75rem;
+            border-radius: 0.5rem; cursor: pointer; transition: background-color 0.3s;
+        }
+        .post-item-actions button:hover { background-color: #d32f2f; }
+        #back-to-home { display: block; text-align: center; margin-top: 1.5rem; color: var(--primary-color); text-decoration: none; }
+    </style>
+</head>
+<body>
+
+    <script>
+        // SCRIPT KEAMANAN: Cek status login di paling atas
+        if (sessionStorage.getItem('isAdminLoggedIn') !== 'true') {
+            // Jika belum login, paksa kembali ke halaman login
+            window.location.href = 'login.html';
+        }
+    </script>
+
+    <header>
+        <h1>Admin Panel</h1>
+        <button id="logout-btn" style="padding: 0.5rem 1rem; cursor: pointer; background-color: #f44336; color: white; border: none; border-radius: 0.5rem; font-weight: bold;">Logout</button>
+    </header>
+
+    <main>
+        <section class="form-container">
+            <h2>Tambah Lowongan Baru</h2>
+            <form id="add-post-form">
+                <div class="form-group">
+                    <label for="post-title">Judul Lowongan</label>
+                    <input type="text" id="post-title" name="post-title" required>
+                </div>
+                <div class="form-group">
+                    <label for="post-company">Nama Perusahaan</label>
+                    <input type="text" id="post-company" name="post-company" required>
+                </div>
+                <div class="form-group">
+                    <label for="post-location">Lokasi</label>
+                    <input type="text" id="post-location" name="post-location" required>
+                </div>
+                <div class="form-group">
+                    <label for="post-category">Kategori</label>
+                    <select id="post-category" name="post-category" required>
+                        <option value="">Pilih Kategori</option>
+                        <option value="IT & Software">IT & Software</option>
+                        <option value="Sales & Marketing">Sales & Marketing</option>
+                        <option value="Finance">Finance</option>
+                        <option value="Human Resources">Human Resources</option>
+                        <option value="Engineering">Engineering</option>
+                        <option value="Creative & Design">Creative & Design</option>
+                        <option value="Other">Lain-lain</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="post-image-url">URL Gambar (Opsional)</label>
+                    <input type="url" id="post-image-url" name="post-image-url">
+                </div>
+                <div class="form-group">
+                    <label for="post-apply-link">Link Pendaftaran (Opsional)</label>
+                    <input type="url" id="post-apply-link" name="post-apply-link">
+                </div>
+                <div class="form-group">
+                    <label for="post-apply-email">Email Pendaftaran (Opsional)</label>
+                    <input type="email" id="post-apply-email" name="post-apply-email">
+                </div>
+                <div class="form-group">
+                    <label for="post-content">Deskripsi Lengkap</label>
+                    <textarea id="post-content" name="post-content" required></textarea>
+                </div>
+                <button type="submit" id="submit-btn">Tambah Postingan</button>
+            </form>
+        </section>
+
+        <section class="post-list-container">
+            <h2>Daftar Postingan</h2>
+            <div id="posts-list"></div>
+        </section>
+        
+        <a href="index.html" id="back-to-home">Kembali ke Halaman Utama</a>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const form = document.getElementById('add-post-form');
+            const postsListContainer = document.getElementById('posts-list');
+            
+            const postTitleInput = document.getElementById('post-title');
+            const postCompanyInput = document.getElementById('post-company');
+            const postLocationInput = document.getElementById('post-location');
+            const postCategoryInput = document.getElementById('post-category');
+            const postImageUrlInput = document.getElementById('post-image-url');
+            const postApplyLinkInput = document.getElementById('post-apply-link');
+            const postApplyEmailInput = document.getElementById('post-apply-email');
+            const postContentInput = document.getElementById('post-content');
+
+            function loadPosts() {
+                const posts = JSON.parse(localStorage.getItem('posts')) || [];
+                renderPosts(posts);
+            }
+
+            function renderPosts(posts) {
+                postsListContainer.innerHTML = '';
+                if (posts.length === 0) {
+                    postsListContainer.innerHTML = '<p style="text-align: center; color: #777;">Belum ada postingan.</p>';
+                    return;
+                }
+                posts.forEach((post, index) => {
+                    const postItem = document.createElement('div');
+                    postItem.classList.add('post-item');
+                    postItem.innerHTML = `
+                        <div class="post-item-info">
+                            <h3>${post.title}</h3>
+                            <p>${post.company} - ${post.location}</p>
+                        </div>
+                        <div class="post-item-actions">
+                            <button onclick="deletePost(${index})">Hapus</button>
+                        </div>
+                    `;
+                    postsListContainer.appendChild(postItem);
+                });
+            }
+
+            form.addEventListener('submit', (event) => {
+                event.preventDefault();
+
+                const newPostData = {
+                    title: postTitleInput.value.trim(),
+                    company: postCompanyInput.value.trim(),
+                    location: postLocationInput.value.trim(),
+                    category: postCategoryInput.value.trim(),
+                    image: postImageUrlInput.value.trim() || null,
+                    applyLink: postApplyLinkInput.value.trim() || null,
+                    applyEmail: postApplyEmailInput.value.trim() || null,
+                    content: postContentInput.value.trim(),
+                    time: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }),
+                    datePublished: new Date().toISOString()
+                };
+
+                if (!newPostData.applyLink && !newPostData.applyEmail) {
+                    alert('Harap isi Link Pendaftaran atau Email Pendaftaran.');
+                    return;
+                }
+
+                const posts = JSON.parse(localStorage.getItem('posts')) || [];
+                posts.unshift(newPostData);
+                localStorage.setItem('posts', JSON.stringify(posts));
+
+                form.reset();
+                loadPosts();
+                alert('Postingan berhasil ditambahkan!');
+            });
+
+            window.deletePost = (index) => {
+                const posts = JSON.parse(localStorage.getItem('posts')) || [];
+                posts.splice(index, 1);
+                localStorage.setItem('posts', JSON.stringify(posts));
+                loadPosts();
+            };
+
+            loadPosts();
+
+            // SCRIPT LOGOUT
+            document.getElementById('logout-btn').addEventListener('click', function() {
+                sessionStorage.removeItem('isAdminLoggedIn');
+                window.location.href = 'login.html';
+            });
+        });
+    </script>
+</body>
+</html>
