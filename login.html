@@ -6,74 +6,32 @@
     <title>Admin Login</title>
     <style>
         :root {
-            --primary-color: #4CAF50;
-            --background-color: #f0f2f5;
-            --card-background: #fff;
-            --text-color: #555;
-            --border-radius: 0.75rem;
-            --box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.08);
+            --primary-color: #4CAF50; --background-color: #f0f2f5; --card-background: #fff;
+            --text-color: #555; --border-radius: 0.75rem; --box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.08);
             --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
         }
         body {
-            font-family: var(--font-family);
-            background-color: var(--background-color);
-            color: var(--text-color);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
+            font-family: var(--font-family); background-color: var(--background-color); color: var(--text-color);
+            display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0;
         }
         .login-container {
-            width: 100%;
-            max-width: 400px;
-            padding: 2.5rem;
-            background-color: var(--card-background);
-            border-radius: var(--border-radius);
-            box-shadow: var(--box-shadow);
-            text-align: center;
+            width: 100%; max-width: 400px; padding: 2.5rem; background-color: var(--card-background);
+            border-radius: var(--border-radius); box-shadow: var(--box-shadow); text-align: center;
         }
-        h1 {
-            color: #333;
-            margin-bottom: 2rem;
-        }
-        .form-group {
-            margin-bottom: 1.5rem;
-            text-align: left;
-        }
-        label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-weight: bold;
-        }
-        input[type="password"] {
-            width: 100%;
-            padding: 0.75rem;
-            border: 1px solid #ccc;
-            border-radius: 0.5rem;
-            font-size: 1rem;
-            box-sizing: border-box;
+        h1 { color: #333; margin-bottom: 2rem; }
+        .form-group { margin-bottom: 1.5rem; text-align: left; }
+        label { display: block; margin-bottom: 0.5rem; font-weight: bold; }
+        input {
+            width: 100%; padding: 0.75rem; border: 1px solid #ccc; border-radius: 0.5rem;
+            font-size: 1rem; box-sizing: border-box;
         }
         button {
-            width: 100%;
-            padding: 1rem;
-            background-color: var(--primary-color);
-            color: white;
-            border: none;
-            border-radius: 0.5rem;
-            font-size: 1.1rem;
-            font-weight: bold;
-            cursor: pointer;
-            transition: background-color 0.3s;
+            width: 100%; padding: 1rem; background-color: var(--primary-color); color: white;
+            border: none; border-radius: 0.5rem; font-size: 1.1rem; font-weight: bold;
+            cursor: pointer; transition: background-color 0.3s;
         }
-        button:hover {
-            background-color: #43a047;
-        }
-        .error-message {
-            color: #f44336;
-            margin-top: 1rem;
-            display: none;
-        }
+        button:hover { background-color: #43a047; }
+        .error-message { color: #f44336; margin-top: 1rem; min-height: 1.2em; display: none; }
     </style>
 </head>
 <body>
@@ -82,31 +40,65 @@
         <h1>Admin Login</h1>
         <form id="login-form">
             <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" required>
+            </div>
+            <div class="form-group">
                 <label for="password">Password</label>
                 <input type="password" id="password" required>
             </div>
             <button type="submit">Login</button>
-            <p id="error-message" class="error-message">Password salah!</p>
+            <p id="error-message" class="error-message"></p>
         </form>
     </div>
 
-    <script>
-        document.getElementById('login-form').addEventListener('submit', function(event) {
-            event.preventDefault();
-            
-            // GANTI PASSWORD ANDA DI SINI
-            const correctPassword = 'adminpilihan123'; 
-            
-            const enteredPassword = document.getElementById('password').value;
-            const errorMessage = document.getElementById('error-message');
+    <script type="module">
+      // Import Firebase modules
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+      import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
-            if (enteredPassword === correctPassword) {
-                sessionStorage.setItem('isAdminLoggedIn', 'true');
+      // Your web app's Firebase configuration
+      const firebaseConfig = {
+        apiKey: "AIzaSyBUOQwVvZc8IZN71RwtbKrFzA7CpG0m49o",
+        authDomain: "proyek-lowongan-kerja-c933f.firebaseapp.com",
+        projectId: "proyek-lowongan-kerja-c933f",
+        storageBucket: "proyek-lowongan-kerja-c933f.appspot.com",
+        messagingSenderId: "231433829107",
+        appId: "1:231433829107:web:3221219b30bbbac4835586",
+        measurementId: "G-PH45KLEYDV"
+      };
+
+      // Initialize Firebase
+      const app = initializeApp(firebaseConfig);
+      const auth = getAuth(app);
+
+      // Login Logic
+      const loginForm = document.getElementById('login-form');
+      const errorMessage = document.getElementById('error-message');
+
+      loginForm.addEventListener('submit', (event) => {
+        event.preventDefault();
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+
+        errorMessage.style.display = 'none';
+
+        signInWithEmailAndPassword(auth, email, password)
+            .then((userCredential) => {
+                // Login berhasil, alihkan ke halaman admin
                 window.location.href = 'admin.html';
-            } else {
+            })
+            .catch((error) => {
+                // Tangani error login
+                console.error("Login Error:", error);
+                if (error.code === 'auth/invalid-credential' || error.code === 'auth/user-not-found') {
+                    errorMessage.textContent = 'Email atau password salah.';
+                } else {
+                    errorMessage.textContent = 'Terjadi kesalahan saat login.';
+                }
                 errorMessage.style.display = 'block';
-            }
-        });
+            });
+      });
     </script>
 
 </body>
