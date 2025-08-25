@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin - Lowongan Pilihan</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         *, *::before, *::after { box-sizing: border-box; }
         :root {
@@ -16,6 +15,8 @@
         body {
             font-family: var(--font-family); background-color: var(--background-color);
             color: var(--text-color); line-height: 1.6; margin: 0; padding: 0;
+            /* Tambahkan ini untuk menyembunyikan konten sampai verifikasi selesai */
+            visibility: hidden; 
         }
         header {
             background-color: var(--card-background); box-shadow: var(--box-shadow);
@@ -56,14 +57,6 @@
     </style>
 </head>
 <body>
-
-    <script>
-        // SCRIPT KEAMANAN: Cek status login di paling atas
-        if (sessionStorage.getItem('isAdminLoggedIn') !== 'true') {
-            // Jika belum login, paksa kembali ke halaman login
-            window.location.href = 'login.html';
-        }
-    </script>
 
     <header>
         <h1>Admin Panel</h1>
@@ -127,7 +120,51 @@
         <a href="index.html" id="back-to-home">Kembali ke Halaman Utama</a>
     </main>
 
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+      import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+      // Your web app's Firebase configuration
+      const firebaseConfig = {
+        apiKey: "AIzaSyBUOQwVvZc8IZN71RwtbKrFzA7CpG0m49o",
+        authDomain: "proyek-lowongan-kerja-c933f.firebaseapp.com",
+        projectId: "proyek-lowongan-kerja-c933f",
+        storageBucket: "proyek-lowongan-kerja-c933f.appspot.com",
+        messagingSenderId: "231433829107",
+        appId: "1:231433829107:web:3221219b30bbbac4835586",
+        measurementId: "G-PH45KLEYDV"
+      };
+
+      // Initialize Firebase
+      const app = initializeApp(firebaseConfig);
+      const auth = getAuth(app);
+
+      // SCRIPT KEAMANAN: Memeriksa status login pengguna
+      onAuthStateChanged(auth, (user) => {
+        if (user) {
+            // Pengguna sudah login, tampilkan konten halaman
+            document.body.style.visibility = 'visible';
+        } else {
+            // Pengguna tidak login, alihkan ke halaman login
+            window.location.href = 'login.html';
+        }
+      });
+
+      // SCRIPT LOGOUT
+      const logoutButton = document.getElementById('logout-btn');
+      logoutButton.addEventListener('click', () => {
+        signOut(auth).then(() => {
+            // Logout berhasil, alihkan ke halaman login
+            window.location.href = 'login.html';
+        }).catch((error) => {
+            console.error('Logout Error:', error);
+            alert('Gagal untuk logout.');
+        });
+      });
+    </script>
+    
     <script>
+        // ... (Semua kode JavaScript lama Anda untuk menambah dan menghapus postingan tetap di sini, tidak perlu diubah) ...
         document.addEventListener('DOMContentLoaded', () => {
             const form = document.getElementById('add-post-form');
             const postsListContainer = document.getElementById('posts-list');
@@ -165,7 +202,7 @@
                         </div>
                     `;
                     postsListContainer.appendChild(postItem);
-                });
+});
             }
 
             form.addEventListener('submit', (event) => {
@@ -206,12 +243,6 @@
             };
 
             loadPosts();
-
-            // SCRIPT LOGOUT
-            document.getElementById('logout-btn').addEventListener('click', function() {
-                sessionStorage.removeItem('isAdminLoggedIn');
-                window.location.href = 'login.html';
-            });
         });
     </script>
 </body>
